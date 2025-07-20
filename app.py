@@ -8,10 +8,10 @@ app.secret_key = 'supersecretkey'
 # Путь к БД
 DATABASE = 'database.db'
 
-# Проверка токена (пример)
+# Токен админа
 VALID_TOKEN = "admin123"
 
-# Создание таблицы
+
 def init_db():
     with app.app_context():
         db = sqlite3.connect(DATABASE)
@@ -25,47 +25,64 @@ def init_db():
         ''')
         db.commit()
 
-# Получение БД
+
 def get_db():
     return sqlite3.connect(DATABASE)
 
-@app.route('/admin-panel-innd', methods=['GET', 'POST'])
+
+@app.route('/', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        token_or_username = request.form.get('token')
+
+        # Проверяем, совпадает ли введённое значение с токеном
+        if token_or_username == VALID_TOKEN:
+            session['logged_in'] = True
+            return redirect(url_for('admin'))
+
+        # Или это имя пользователя?
+        db = get_db()
+        user_exists = db.execute(
+            'SELECT 1 FROM trophies WHERE username = ?', (token_or_username,)
+        ).fetchone()
+
+        if user_exists:
+            return redirect(url_for('user_trophies', username=token_or_username))
+
+        flash("Пользователь не найден")
+        return redirect(url_for('login'))
+
+    return render_template('login.html')
+
+
+@app.route('/admin-panel-innd')
 def admin():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
-
-    if request.method == 'POST':
-        username = request.form.get('username')
-        image_url = request.form.get('image_url')
-        size = request.form.get('size')
-
-        if username and image_url and size:
-            db = get_db()
-            db.execute('INSERT INTO trophies (username, image_url, size) VALUES (?, ?, ?)',
-                       (username, image_url, size))
-            db.commit()
-            flash("Трофей добавлен!")
-            return redirect(url_for('admin'))
 
     db = get_db()
     trophies = db.execute('SELECT username, image_url, size FROM trophies').fetchall()
     return render_template('admin.html', trophies=trophies)
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        token = request.form.get('token')
-        if token == VALID_TOKEN:
-            session['logged_in'] = True
-            return redirect(url_for('admin'))
-        else:
-            flash("Неверный токен!")
-    return render_template('login.html')
+
+@app.route('/trophies/<username>')
+def user_trophies(username):
+    db = get_db()
+    trophies = db.execute(
+        'SELECT username, image_url, size FROM trophies WHERE username = ?', (username,)
+    ).fetchall()
+
+    if not trophies:
+        return "Нет трофеев для отображения", 404
+
+    return render_template('user_trophies.html', trophies=trophies, username=username)
+
 
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('login'))
+
 
 if __name__ == '__main__':
     init_db()
