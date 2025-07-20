@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Трофеи {{ username }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h2>Трофеи пользователя: {{ username }}</h2>
+
+    <ul>
+        {% for trophy in trophies %}
+            <li>
+                [{{ trophy[0] }}]
+                [{{ trophy[1] }}]
+                [{{ trophy[2] }}]
+                <img src="{{ trophy[1] }}" width="{{ trophy[2] }}" />
+            </li>
+        {% endfor %}
+    </ul>
+
+    <a href="{{ url_for('login') }}">Назад</a>
+</body>
+</html>
