@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h2>Введите токен</h2>
+    <h2>Введите токен или имя пользователя</h2>
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             {% for message in messages %}
@@ -14,7 +14,7 @@
         {% endif %}
     {% endwith %}
     <form method="POST">
-        <input type="password" name="token" placeholder="Токен" required>
+        <input type="text" name="token" placeholder="admin123 или имя" required>
         <button type="submit">Войти</button>
     </form>
 </body>
