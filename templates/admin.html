@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Админ-панель</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h2>Добавить трофей</h2>
+    <form method="POST">
+        <input type="text" name="username" placeholder="Имя пользователя" required>
+        <input type="text" name="image_url" placeholder="Ссылка на картинку" required>
+        <input type="text" name="size" placeholder="Размер (например: 150px)" required>
+        <button type="submit">Добавить</button>
+    </form>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="success">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <h3>Список трофеев</h3>
+    <ul>
+        {% for trophy in trophies %}
+            <li>
+                [{{ trophy[0] }}]
+                [{{ trophy[1] }}]
+                [{{ trophy[2] }}]
+                <img src="{{ trophy[1] }}" width="{{ trophy[2] }}" />
+            </li>
+        {% endfor %}
+    </ul>
+
+    <a href="{{ url_for('logout') }}">Выход</a>
+</body>
+</html>
